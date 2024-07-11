@@ -1,4 +1,4 @@
-This is a work in progress, open in a browser and click and drag to change the view.
+This is a work in progress, open index.html in a browser and click and drag to change the view.
 
 I am creating a three dimensional map of the shelves in a machine parts distribution warehouse. There are about 12 rows of shelves in the warehouse. 
 
