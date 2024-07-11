@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Shelves with Three.js</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
+    <script>
+        // Basic setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // OrbitControls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.25;
+        controls.screenSpacePanning = false;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft white light
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(10, 10, 10).normalize();
+        scene.add(directionalLight);
+
+        // Shelf dimensions
+        const shelfWidth = 10;
+        const shelfHeight = 1;
+        const shelfDepth = 3;
+
+        // Box dimensions
+        const boxHeight = 1;
+        const boxDepth = 1;
+
+        // Numbers for boxes (adjust numbers as needed)
+        const numbers = [
+            [1, 2, 3, 4, 5],    // Shelf 1
+            [6, 7, 8, 9, 10],  // Shelf 2
+            [11, 12, 13, 14, 15],  // Shelf 3
+            [16, 17, 18, 19, 20],  // Shelf 4
+            [21, 22, 23, 24, 25]   // Shelf 5
+        ];
+
+        // Function to create boxes with text
+        function createBoxAndText(x, y, z, number, alternateColor) {
+            const loader = new THREE.FontLoader();
+            loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+                const textGeometry = new THREE.TextGeometry(number.toString(), {
+                    font: font,
+                    size: 0.2, // Reduced font size
+                    height: 0.05,
+                });
+                textGeometry.computeBoundingBox();
+                const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
+
+                const boxWidth = textWidth + 0.5; // Adding some padding
+                const boxGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+                let boxMaterial;
+
+                if (alternateColor) {
+                    boxMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 }); // Red color
+                } else {
+                    boxMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 }); // Green color
+                }
+
+                const box = new THREE.Mesh(boxGeometry, boxMaterial);
+                box.position.set(x, y, z);
+                scene.add(box);
+
+                const textMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+                const text = new THREE.Mesh(textGeometry, textMaterial);
+                text.position.set(x - textWidth / 2, y - 0.5, z + boxDepth / 2); // Positioning text directly in front of the box
+                text.rotation.set(0, 0, 0); // Ensure text faces the camera
+                scene.add(text);
+            }, undefined, function (err) {
+                console.error('An error happened while loading the font:', err);
+            });
+        }
+
+        // Function to create shelves
+        function createShelves() {
+            const numSets = 7; // Number of sets of shelves
+            const spaceBetweenSets = 2; // Reduced space between each set
+            const spaceBetweenShelves = 5; // Space between each shelf in a set
+
+            for (let i = 0; i < numSets; i++) {
+                for (let j = 0; j < numbers.length; j++) {
+                    const geometry = new THREE.BoxGeometry(shelfWidth, shelfHeight, shelfDepth);
+                    const material = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color
+                    const shelf = new THREE.Mesh(geometry, material);
+
+                    const startY = (i * (shelfHeight + spaceBetweenSets)); // Position sets of shelves along the y-axis
+                    const startZ = (j * (shelfDepth + spaceBetweenShelves)); // Position shelves within a set along the z-axis
+                    shelf.position.set(0, startY, startZ);
+                    scene.add(shelf);
+
+                    // Calculate the starting position for the first box on the shelf
+                    const startOffset = (numbers[j].length * 0.5 - 0.5) * (shelfWidth / numbers[j].length);
+
+                    // Add boxes to each shelf
+                    for (let k = 0; k < numbers[j].length; k++) {
+                        const boxX = -shelfWidth / 2 + k * (shelfWidth / numbers[j].length) + (shelfWidth / numbers[j].length) / 2;
+                        const alternateColor = k % 2 === 0; // Alternate colors based on even or odd index
+                        createBoxAndText(boxX, startY + 1, startZ, numbers[j][k], alternateColor);
+                    }
+                }
+            }
+
+            // Floor
+            const totalDepth = numbers.length * (shelfDepth + spaceBetweenShelves);
+            const floorGeometry = new THREE.BoxGeometry(50, 1, totalDepth * 2); // Increase the depth of the floor
+            const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff }); // White color
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.position.y = -1;
+            scene.add(floor);
+        }
+
+        // Position camera
+        camera.position.z = 50;
+        camera.position.y = 50;
+        camera.lookAt(0, 0, 0);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Call the function to create shelves
+        createShelves();
+    </script>
+</body>
+</html>
