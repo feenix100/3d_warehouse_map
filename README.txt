@@ -1,8 +1,11 @@
-This is a work in progress, open index.html in a browser and click and drag to change the view.
+# 3d Map for a Machine Parts Distribution Warehouse - Using three.js, a javascript 3d library
+
+This is a work in progress, open index.html in a browser. Click and drag the cursor to change the view.
 
 I am creating a three dimensional map of the shelves in a machine parts distribution warehouse. There are about 20 rows of shelves in the warehouse. 
 
 I am still trying to decide how to display the numbers on each shelf, should I use a drop box, or text objects or something else?
+I need to be able to easily edit the values and positions of the numbers on the shelves.
 
 Each shelf is filled with parts that are labeled and organized using numbers, four to six digits in length. Example 8421, 100201. There are about 3000 different parts in the warehouse.
 
