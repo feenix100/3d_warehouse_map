@@ -1,4 +1,5 @@
-# 3d Map for a Machine Parts Distribution Warehouse - Using three.js, a javascript 3d library
+# 3d Map for a Machine Parts Distribution Warehouse 
+# Using three.js, a javascript 3d library
 
 This is a work in progress, open index.html in a browser. Click and drag the cursor to change the view.
 
