@@ -1,0 +1,9 @@
+# Logs
+logs
+*.log
+
+# SSH keys
+id_rsa
+id_rsa.pub
+sshkey
+sshkey.txt
