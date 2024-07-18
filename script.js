@@ -56,9 +56,20 @@ const numbers = [
 
 let shelfSets = []; // Array to hold groups of shelves
 
+const shelfSetNames = [
+    "1stRow_Midsection",   // Shelf Set 1
+    "2ndRow_Midsection",        // Shelf Set 2
+    "3rdRow_Midsection",   // Shelf Set 3
+    "4thRow_Midsection",   // Shelf Set 4
+    "5thRow_Midsection",   // Shelf Set 5
+    "6thRow_Midsection",   // Shelf Set 6
+    "7thRow_Midsection",   // Shelf Set 7
+    
+    // Add more names as needed
+];
+
 // Function to create shelves
-// Function to create shelves
-function createShelves(positions) {
+function createShelves(positions, shelfSetNames) {
     const spaceBetweenSets = 2; // Reduced space between each set
     const spaceBetweenShelves = 5; // Space between each shelf in a set
 
@@ -76,6 +87,10 @@ function createShelves(positions) {
             } else if (shelfType === 'extraLong') {
                 shelfWidth = shelfDimensions.extraLong.width;
                 shelfLength = shelfDimensions.extraLong.length;
+            } else if (shelfType === 'extraLong_Rotated') {
+                shelfWidth = shelfDimensions.extraLong.width;
+                shelfLength = shelfDimensions.extraLong.length;
+                shelfGroup.rotation.set(0, Math.PI / 2, 0);
             } else {
                 shelfWidth = shelfDimensions.regular.width;
                 shelfLength = shelfDimensions.regular.length;
@@ -91,11 +106,16 @@ function createShelves(positions) {
 
             const startY = j * (shelfHeight + spaceBetweenShelves);
             shelf.position.set(0, startY, 0);
+
+            // Assign a unique name to each shelf in the format 'shelf-setIndex-shelfIndex'
+            shelf.name = `shelf-${i}-${j}`;
+
+            console.log(`Created shelf with name: ${shelf.name}`); // Debug logging
+
             shelfGroup.add(shelf);
         }
 
-        // Create label above the shelf set
-        let label = `Shelf ${i + 1}`;
+        let label = shelfSetNames[i];
         if (shelfType === 'extraLong') {
             label += ' (Extra Long)';
         } else if (shelfType === 'rotated') {
@@ -106,6 +126,7 @@ function createShelves(positions) {
         shelfSets.push(shelfGroup); // Add group to array
     });
 }
+
 
 
 // Function to create labels for shelf sets
@@ -137,12 +158,36 @@ function createShelfLabel(group, text, yPosition) {
     });
 }
 
-
 // Shelf positions for regular, rotated, and extra-long shelves
 const positions = [
-    { startX: -20, startZ: 0, shelfType: 'regular' }, // First set of regular shelves
-    { startX: 0, startZ: 0, shelfType: 'rotated' },  // Second set of rotated shelves
-    { startX: 20, startZ: 0, shelfType: 'extraLong' }  // Third set of extra-long shelves
+    { startX: -10, startZ: -5, shelfType: 'regular' },
+    { startX: -10, startZ: 5, shelfType: 'regular' },
+    { startX: -10, startZ: 15, shelfType: 'regular' },
+    { startX: -10, startZ: 25, shelfType: 'regular' },
+    { startX: -10, startZ: 35, shelfType: 'regular' },
+    { startX: -10, startZ: 45, shelfType: 'regular' },
+    { startX: -10, startZ: 55, shelfType: 'regular' },
+    { startX: 10, startZ: 25, shelfType: 'regular' },
+
+    { startX: 10, startZ: 35, shelfType: 'regular' },
+    { startX: 10, startZ: 45, shelfType: 'regular' },
+    { startX: 10, startZ: 55, shelfType: 'regular' },
+    { startX: 10, startZ: 55, shelfType: 'regular' },
+
+    { startX: 10, startZ: 55, shelfType: 'regular' },
+    { startX: 10, startZ: 55, shelfType: 'regular' },
+    { startX: 10, startZ: 55, shelfType: 'regular' },
+    { startX: 10, startZ: 55, shelfType: 'regular' },
+    { startX: 10, startZ: 55, shelfType: 'regular' },
+
+    //{ startX: 0, startZ: 0, shelfType: 'rotated' },
+
+    { startX: -10, startZ: -40, shelfType: 'extraLong' },
+    { startX: -50, startZ: -40, shelfType: 'extraLong' },
+
+    { startX: -50, startZ: 50, shelfType: 'extraLong_Rotated' }
+
+
 ];
 
 // Function to create the desk
@@ -158,13 +203,14 @@ function createDesk() {
     const desk = new THREE.Mesh(deskGeometry, deskMaterial);
 
     // Position the desk appropriately
-    desk.position.set(0, deskHeight / 2, -20); // Adjust as needed
+    desk.position.set(90, deskHeight / 2, -10); // Adjust as needed
+    desk.rotation.set(0, Math.PI / 2, 0);
 
     scene.add(desk);
 }
 
 // Create shelves with custom dimensions
-createShelves(positions);
+createShelves(positions, shelfSetNames);
 
 createDesk();
 
@@ -236,17 +282,75 @@ function animate() {
 }
 animate();
 
+// Updated numbers data structure
+// Define numbers for each shelf set
+const shelfSetsNumbers = [
+    // Shelf Set 1
+    [
+        [1, 2, 3, 4, 5],    // Shelf 1
+        [6, 7, 8, 9, 10],   // Shelf 2
+        [11, 12, 13, 14, 15],  // Shelf 3
+        [16, 17, 18, 19, 20],  // Shelf 4
+        [21, 22, 23, 24, 25]   // Shelf 5
+    ],
+    // Shelf Set 2
+    [
+        [26, 27, 28, 29, 30],    // Shelf 1
+        [31, 32, 33, 34, 35],    // Shelf 2
+        [36, 37, 38, 39, 40],    // Shelf 3
+        [41, 42, 43, 44, 45],    // Shelf 4
+        [46, 47, 48, 49, 50]     // Shelf 5
+    ],
+    // Shelf Set 3 and so on...
+];
+
 // Event listener for mouse click
 window.addEventListener('click', (event) => {
     event.preventDefault();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
 
     const intersects = raycaster.intersectObjects(scene.children, true);
 
     if (intersects.length > 0) {
         const intersectedObject = intersects[0].object;
-        console.log(intersectedObject.name); // Log the name of the clicked object
+        const name = intersectedObject.name;
+
+        console.log('Clicked on object with name:', name); // Debug logging
+
+        // Use regular expression to extract setIndex and shelfIndex
+        const regex = /^shelf-(\d+)-(\d+)$/; // Matches 'shelf-<digits>-<digits>'
+        const match = name.match(regex);
+
+        if (match) {
+            const setIndex = parseInt(match[1]); // Convert to integer
+            const shelfIndex = parseInt(match[2]); // Convert to integer
+
+            console.log('Clicked on shelf:', setIndex, shelfIndex);
+
+            if (!isNaN(setIndex) && !isNaN(shelfIndex) && shelfSetsNumbers[setIndex] && shelfSetsNumbers[setIndex][shelfIndex]) {
+                const numbers = shelfSetsNumbers[setIndex][shelfIndex];
+
+                // Display numbers (example: update a DOM element)
+                const infoBox = document.getElementById('infoBox');
+                infoBox.innerHTML = `Numbers on ${name}: ${numbers.join(', ')}`;
+                infoBox.style.display = 'block';
+                infoBox.style.left = `${event.clientX}px`;
+                infoBox.style.top = `${event.clientY}px`;
+            } else {
+                console.error('Invalid indices:', setIndex, shelfIndex);
+            }
+        } else {
+            console.error('Invalid name format:', name);
+        }
     }
 });
+
+
+
+
+
+
+
+

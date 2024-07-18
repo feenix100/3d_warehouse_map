@@ -16,6 +16,14 @@
         .dropdown select {
             width: 100px;
         }
+        .infoBox {
+            position: absolute;
+            display: none;
+            background-color: white;
+            padding: 10px;
+            /* Additional styling as needed */
+        }
+
     </style>
 </head>
 <body>
@@ -28,6 +36,8 @@
             <option value="5">5</option>
         </select>
     </div>
+    <div id="infoBox" style="display: none; position: absolute; background-color: white; border: 1px solid black; padding: 10px;"></div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
