@@ -121,15 +121,17 @@
         }
 
         // Function to create shelves
-        function createShelves(positions) {
+        function createShelves(numSets = 1) {
             const spaceBetweenSets = 2; // Reduced space between each set
             const spaceBetweenShelves = 5; // Space between each shelf in a set
 
-            positions.forEach((position, i) => {
-                const { startX, startZ } = position;
+            for (let i = 0; i < numSets; i++) {
                 const shelfGroup = new THREE.Group();
-                shelfGroup.position.set(startX, 0, startZ); // Set initial position
-
+                const shelfControl = {
+                    x: 0,
+                    yRotation: 0, // Rotation on y-axis
+                    z: 10,
+                };
                 for (let j = 0; j < numbers.length; j++) {
                     const geometry = new THREE.BoxGeometry(shelfWidth, shelfHeight, shelfDepth);
                     const material = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color
@@ -137,6 +139,9 @@
 
                     const startY = (j * (shelfHeight + spaceBetweenShelves)); // Position shelves within a set along the y-axis
                     shelf.position.set(0, startY, 0);
+
+                    shelf.rotation.y = shelfControl.yRotation; // Apply rotation
+
                     shelfGroup.add(shelf);
 
                     // Calculate the starting position for the first box on the shelf
@@ -155,19 +160,60 @@
                 shelfSets.push(shelfGroup); // Add group to array
 
                 // Add GUI controls for the new shelf set
-                const shelfControl = {
-                    x: startX,
-                    z: startZ,
-                };
                 const folder = gui.addFolder(`Shelf Set ${shelfSets.length}`);
-                folder.add(shelfControl, 'x', -50, 50).name('Position X').onChange((value) => {
+                
+                folder.add(shelfControl, 'x').min(-100).max(100).name('Position X').onChange((value) => {
                     shelfGroup.position.x = value;
                 });
-                folder.add(shelfControl, 'z', -50, 50).name('Position Z').onChange((value) => {
+                folder.add(shelfControl, 'yRotation').min(0).max(Math.PI * 2).name('Rotation Y').onChange((value) => {
+                    // Snap rotation to nearest π/2 for easier alignment
+                const snappedRotation = Math.round(value / (Math.PI / 2)) * (Math.PI / 2);
+                shelfGroup.rotation.y = snappedRotation;
+                    //shelfGroup.rotation.y = value;
+                });
+                folder.add(shelfControl, 'z').min(-100).max(100).name('Position Z').onChange((value) => {
                     shelfGroup.position.z = value;
                 });
                 folder.open();
+            }
+        }
+
+        function createDesk() {
+            // Desk geometry and material
+            const deskWidth = 20;
+            const deskHeight = 2;
+            const deskDepth = 10;
+
+            const deskGeometry = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth);
+            const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color
+
+            const desk = new THREE.Mesh(deskGeometry, deskMaterial);
+
+            // Position the desk appropriately
+            desk.position.set(0, deskHeight / 2, -20); // Adjust as needed
+
+            // Add GUI controls for the new desk
+            const deskControl = {
+                x: 0,
+                yRotation: 0, // Rotation on y-axis
+                z: 10,
+            }
+
+            const folder = gui.addFolder(`Desk`);
+            folder.add(deskControl, 'x').min(-100).max(100).name('Position X').onChange((value) => {
+                desk.position.x = value;
             });
+            folder.add(deskControl, 'yRotation').min(0).max(Math.PI * 2).name('Rotation Y').onChange((value) => {
+                // Snap rotation to nearest π/2 for easier alignment
+                const snappedRotation = Math.round(value / (Math.PI / 2)) * (Math.PI / 2);
+                desk.rotation.y = snappedRotation;
+                // desk.rotation.y = value; // will spin without snapping to alignment
+            });
+            folder.add(deskControl, 'z').min(-100).max(100).name('Position Z').onChange((value) => {
+                desk.position.z = value;
+            });
+            folder.open();
+            scene.add(desk);
         }
 
         // Function to create the floor
@@ -214,10 +260,7 @@
 
         // Function to add a new shelf set
         function addShelfSet() {
-            const positions = [
-                { startX: Math.random() * 100 - 50, startZ: Math.random() * 100 - 50 }
-            ];
-            createShelves(positions);
+            createShelves(1);
         }
 
         // Position camera
@@ -242,18 +285,10 @@
         });
 
         // Call the function to create initial shelves, floor, and grid
-        const initialPositions = [
-            { startX: 0, startZ: -30 },
-            { startX: 0, startZ: -20 },
-            { startX: 0, startZ: -10 },
-            { startX: 0, startZ: 0 },
-            { startX: 0, startZ: 10 },
-            { startX: 0, startZ: 20 },
-            { startX: 0, startZ: 30 },
-        ];
-        createShelves(initialPositions); // Initialize with 7 sets of shelves at specific positions
+        createShelves(7); // Initialize with 7 sets of shelves
         createFloor(200);
         createGrid(200, 20);
+        createDesk();
     </script>
 </body>
 </html>
