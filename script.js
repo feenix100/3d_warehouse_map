@@ -158,37 +158,30 @@ function createShelfLabel(group, text, yPosition) {
     });
 }
 
-// Shelf positions for regular, rotated, and extra-long shelves
-const positions = [
-    { startX: -10, startZ: -5, shelfType: 'regular' },
-    { startX: -10, startZ: 5, shelfType: 'regular' },
-    { startX: -10, startZ: 15, shelfType: 'regular' },
-    { startX: -10, startZ: 25, shelfType: 'regular' },
-    { startX: -10, startZ: 35, shelfType: 'regular' },
-    { startX: -10, startZ: 45, shelfType: 'regular' },
-    { startX: -10, startZ: 55, shelfType: 'regular' },
-    { startX: 10, startZ: 25, shelfType: 'regular' },
+// Initialize empty array
+// Shelf positions for regular, rotated, and extra-long shelves 
+const positions = [];
 
-    { startX: 10, startZ: 35, shelfType: 'regular' },
-    { startX: 10, startZ: 45, shelfType: 'regular' },
-    { startX: 10, startZ: 55, shelfType: 'regular' },
-    { startX: 10, startZ: 55, shelfType: 'regular' },
+// Create 7 regular shelves 'rotated' 'regular' 'extraLong' 'extraLong_Rotated'
+for (let i = 0; i < 7; i++) {
+    positions.push({ startX: -30, startZ: -60 + 10 * i, shelfType: 'regular' });
+}
 
-    { startX: 10, startZ: 55, shelfType: 'regular' },
-    { startX: 10, startZ: 55, shelfType: 'regular' },
-    { startX: 10, startZ: 55, shelfType: 'regular' },
-    { startX: 10, startZ: 55, shelfType: 'regular' },
-    { startX: 10, startZ: 55, shelfType: 'regular' },
+// Create 5 regular shelves
+for (let i = 0; i < 5; i++) {
+    positions.push({ startX: 50, startZ: 50 + 10 * i, shelfType: 'regular' });
+}
 
-    //{ startX: 0, startZ: 0, shelfType: 'rotated' },
+// Create 4 regular shelves
+for (let i = 0; i < 4; i++) {
+    positions.push({ startX: -10, startZ: -60 + 10 * i, shelfType: 'regular' });
+}
 
-    { startX: -10, startZ: -40, shelfType: 'extraLong' },
-    { startX: -50, startZ: -40, shelfType: 'extraLong' },
-
-    { startX: -50, startZ: 50, shelfType: 'extraLong_Rotated' }
-
-
-];
+// Additional Individual shelves add here  'rotated' 'regular' 'extraLong' 'extraLong_Rotated' 
+positions.push({ startX: -70, startZ: -40, shelfType: 'extraLong' });
+positions.push({ startX: -80, startZ: -40, shelfType: 'extraLong' });
+positions.push({ startX: -80, startZ: 50, shelfType: 'extraLong_Rotated' });
+// console.log(positions);
 
 // Function to create the desk
 function createDesk() {
