@@ -17,13 +17,16 @@
             width: 100px;
         }
         .infoBox {
-            position: absolute;
-            display: none;
-            background-color: white;
-            padding: 10px;
-            /* Additional styling as needed */
+            position: absolute; 
+            background-color: white; 
+            border: 1px solid black; 
+            padding: 10px; 
+            display: none; /* Initially hidden */
+            z-index: 1000; /* Ensure it's on top of other elements */
+            max-width: 300px; /* Optional: limit the width */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Optional: add shadow */
         }
-
+        
     </style>
 </head>
 <body>
@@ -36,7 +39,8 @@
             <option value="5">5</option>
         </select>
     </div>
-    <div id="infoBox" style="display: none; position: absolute; background-color: white; border: 1px solid black; padding: 10px;"></div>
+    <div id="infoBox" style="position: absolute; display: none; background: white; border: 1px solid black; padding: 10px; pointer-events: none;"></div>
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>

@@ -38,14 +38,10 @@ const shelfDepth = 3;
 const shelfDimensions = {
     regular: { width: 10, length: 1 },
     rotated: { width: 10, length: 1 },
-    extraLong: { width: 30, length: 5 } // Custom width and length for extra-long shelves
+    extraLong: { width: 30, length: 10 } // Custom width and length for extra-long shelves
 };
 
 // Numbers for boxes - machine part numbers how to display so many numbers efficiently
-// numbers on for parts on shelves will be between 4 and 6 digits long
-// will need to display about 3000 different numbers
-// numbers for parts on shelves should be searchable
-
 const numbers = [
     [1, 2, 3, 4, 5],    // Shelf 1
     [6, 7, 8, 9, 10],   // Shelf 2
@@ -56,25 +52,38 @@ const numbers = [
 
 let shelfSets = []; // Array to hold groups of shelves
 
-const shelfSetNames = [
-    "1stRow_Midsection",   // Shelf Set 1
-    "2ndRow_Midsection",        // Shelf Set 2
-    "3rdRow_Midsection",   // Shelf Set 3
-    "4thRow_Midsection",   // Shelf Set 4
-    "5thRow_Midsection",   // Shelf Set 5
-    "6thRow_Midsection",   // Shelf Set 6
-    "7thRow_Midsection",   // Shelf Set 7
-    
-    // Add more names as needed
+// Arrays for different shelf set names
+const midsectionNames = [];
+const topSectionNames = [];
+const fuelSectionNames = [];
+const extraLongShelfNames = [
+    "East_Shelf", 
+    "South Shelf", 
+    "heater_Rod_Shelf_South_Corner"
 ];
 
+// Midsection names
+for (let i = 1; i <= 7; i++) {
+    midsectionNames.push(`${i}stRow_Midsection`);
+}
+
+// Top section names
+for (let i = 1; i <= 4; i++) {
+    topSectionNames.push(`${i}stRow_Top_Section`);
+}
+
+// Fuel section names
+for (let i = 1; i <= 5; i++) {
+    fuelSectionNames.push(`${i}stRow_Fuel_Section`);
+}
+
 // Function to create shelves
-function createShelves(positions, shelfSetNames) {
+function createShelves(positions) {
     const spaceBetweenSets = 2; // Reduced space between each set
     const spaceBetweenShelves = 5; // Space between each shelf in a set
 
     positions.forEach((position, i) => {
-        const { startX, startZ, shelfType } = position;
+        const { startX, startZ, shelfType, shelfSetName } = position;
         const shelfGroup = new THREE.Group();
         shelfGroup.position.set(startX, 0, startZ); // Set initial position
 
@@ -115,7 +124,7 @@ function createShelves(positions, shelfSetNames) {
             shelfGroup.add(shelf);
         }
 
-        let label = shelfSetNames[i];
+        let label = shelfSetName;
         if (shelfType === 'extraLong') {
             label += ' (Extra Long)';
         } else if (shelfType === 'rotated') {
@@ -126,8 +135,6 @@ function createShelves(positions, shelfSetNames) {
         shelfSets.push(shelfGroup); // Add group to array
     });
 }
-
-
 
 // Function to create labels for shelf sets
 function createShelfLabel(group, text, yPosition) {
@@ -162,188 +169,133 @@ function createShelfLabel(group, text, yPosition) {
 // Shelf positions for regular, rotated, and extra-long shelves 
 const positions = [];
 
-// Create 7 regular shelves 'rotated' 'regular' 'extraLong' 'extraLong_Rotated'
-for (let i = 0; i < 7; i++) {
-    positions.push({ startX: -30, startZ: -60 + 10 * i, shelfType: 'regular' });
+// Create positions for Midsections
+for (let i = 0; i < midsectionNames.length; i++) {
+    positions.push({ startX: -30, startZ: -60 + 10 * i, shelfType: 'regular', shelfSetName: midsectionNames[i] });
 }
 
-// Create 5 regular shelves
-for (let i = 0; i < 5; i++) {
-    positions.push({ startX: 50, startZ: 50 + 10 * i, shelfType: 'regular' });
+// Create positions for Top Sections
+for (let i = 0; i < topSectionNames.length; i++) {
+    positions.push({ startX: -10, startZ: -60 + 10 * i, shelfType: 'regular', shelfSetName: topSectionNames[i] });
 }
 
-// Create 4 regular shelves
-for (let i = 0; i < 4; i++) {
-    positions.push({ startX: -10, startZ: -60 + 10 * i, shelfType: 'regular' });
+// Create positions for Fuel Sections
+for (let i = 0; i < fuelSectionNames.length; i++) {
+    positions.push({ startX: -50, startZ: 50 + 10 * i, shelfType: 'regular', shelfSetName: fuelSectionNames[i] });
 }
 
-// Additional Individual shelves add here  'rotated' 'regular' 'extraLong' 'extraLong_Rotated' 
-positions.push({ startX: -70, startZ: -40, shelfType: 'extraLong' });
-positions.push({ startX: -80, startZ: -40, shelfType: 'extraLong' });
-positions.push({ startX: -80, startZ: 50, shelfType: 'extraLong_Rotated' });
-// console.log(positions);
+// Additional positions for Extra Long Shelves
+//for (let i = 0; i < extraLongShelfNames.length; i++) {
+  //  positions.push({ startX: -50 + 30 * i, startZ: -80 + 20 * i, shelfType: 'extraLong', shelfSetName: extraLongShelfNames[i] });
+//}
 
 // Function to create the desk
 function createDesk() {
     // Desk geometry and material
     const deskWidth = 20;
-    const deskHeight = 2;
+    const deskHeight = 0.5;
     const deskDepth = 10;
 
     const deskGeometry = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth);
-    const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color
-
+    const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x8A8 });
     const desk = new THREE.Mesh(deskGeometry, deskMaterial);
+    desk.position.set(0, -deskHeight / 2, 0); // Set the position so the desk is on the ground (y = 0).
 
-    // Position the desk appropriately
-    desk.position.set(90, deskHeight / 2, -10); // Adjust as needed
-    desk.rotation.set(0, Math.PI / 2, 0);
-
+    // Add desk to the scene
     scene.add(desk);
 }
 
-// Create shelves with custom dimensions
-createShelves(positions, shelfSetNames);
+// Function to create the floor
+function createFloor() {
+    // Floor plane
+    const floorGeometry = new THREE.PlaneGeometry(200, 200); // Large plane
+    const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff }); // White floor
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2; // Rotate to be horizontal
+    floor.position.y = -0.1; // Position slightly below origin to ensure it's visible
+    scene.add(floor);
 
-createDesk();
-
-// Add floor
-const floorGeometry = new THREE.PlaneGeometry(200, 200);
-const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.DoubleSide }); // White color
-const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-floor.rotation.x = Math.PI / 2; // Rotate to lie flat
-floor.position.y = -1; // Move floor down
-scene.add(floor);
-
-// Add grid with coordinates
-const gridHelper = new THREE.GridHelper(200, 50);
-scene.add(gridHelper);
-
-// Function to add coordinates to grid
-function addGridCoordinates(size, divisions) {
-    const loader = new THREE.FontLoader();
-    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const step = size / divisions;
-        const halfSize = size / 2;
-
-        for (let i = 0; i <= divisions; i++) {
-            const position = -halfSize + (i * step);
-
-            const textGeometryX = new THREE.TextGeometry(position.toString(), {
-                font: font,
-                size: 0.5,
-                height: 0.1,
-            });
-
-            const textMaterialX = new THREE.MeshStandardMaterial({ color: 0x000000 }); // Black color
-            const textMeshX = new THREE.Mesh(textGeometryX, textMaterialX);
-
-            textMeshX.position.set(position, 0, halfSize + 2); // Adjust position
-            textMeshX.rotation.x = -Math.PI / 2; // Rotate text to lie flat on the ground
-
-            scene.add(textMeshX);
-
-            const textGeometryZ = new THREE.TextGeometry(position.toString(), {
-                font: font,
-                size: 0.5,
-                height: 0.1,
-            });
-
-            const textMaterialZ = new THREE.MeshStandardMaterial({ color: 0x000000 }); // Black color
-            const textMeshZ = new THREE.Mesh(textGeometryZ, textMaterialZ);
-
-            textMeshZ.position.set(halfSize + 2, 0, position); // Adjust position
-            textMeshZ.rotation.x = -Math.PI / 2; // Rotate text to lie flat on the ground
-            textMeshZ.rotation.z = Math.PI / 2; // Rotate text to face correct direction
-
-            scene.add(textMeshZ);
-        }
-    });
+    // Add grid helper
+    const gridHelper = new THREE.GridHelper(200, 20); // Size and divisions of the grid
+    gridHelper.position.y = -0.1; // Position same as floor to overlay
+    scene.add(gridHelper);
 }
 
-addGridCoordinates(200, 50);
+// Call the functions
+createFloor();
+createDesk();
+createShelves(positions);
 
-// Camera positioning
-camera.position.set(0, 50, 100);
-camera.lookAt(new THREE.Vector3(0, 0, 0));
-
-// Rendering function
+// Animation loop
 function animate() {
     requestAnimationFrame(animate);
+
     controls.update();
     renderer.render(scene, camera);
 }
-animate();
 
-// Updated numbers data structure
-// Define numbers for each shelf set
-const shelfSetsNumbers = [
-    // Shelf Set 1
-    [
-        [1, 2, 3, 4, 5],    // Shelf 1
-        [6, 7, 8, 9, 10],   // Shelf 2
-        [11, 12, 13, 14, 15],  // Shelf 3
-        [16, 17, 18, 19, 20],  // Shelf 4
-        [21, 22, 23, 24, 25]   // Shelf 5
-    ],
-    // Shelf Set 2
-    [
-        [26, 27, 28, 29, 30],    // Shelf 1
-        [31, 32, 33, 34, 35],    // Shelf 2
-        [36, 37, 38, 39, 40],    // Shelf 3
-        [41, 42, 43, 44, 45],    // Shelf 4
-        [46, 47, 48, 49, 50]     // Shelf 5
-    ],
-    // Shelf Set 3 and so on...
-];
+// Function to close the info div
+function closeInfoDiv() {
+    infoDiv.style.display = 'none';
+}
 
-// Event listener for mouse click
-window.addEventListener('click', (event) => {
+// Event listener for mouse clicks
+window.addEventListener('click', onMouseClick, false);
+
+// Get reference to the info div
+const infoDiv = document.getElementById('infoBox');
+
+// Converts 3D coordinates to 2D
+function toScreenPosition(obj, camera, renderer) {
+    const vector = new THREE.Vector3();
+    const widthHalf = 0.5 * renderer.domElement.width;
+    const heightHalf = 0.5 * renderer.domElement.height;
+
+    obj.updateMatrixWorld();
+    vector.setFromMatrixPosition(obj.matrixWorld);
+    vector.project(camera);
+
+    vector.x = (vector.x * widthHalf) + widthHalf;
+    vector.y = -(vector.y * heightHalf) + heightHalf;
+
+    return {
+        x: vector.x,
+        y: vector.y
+    };
+}
+
+// Handle mouse click
+function onMouseClick(event) {
     event.preventDefault();
+
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
     raycaster.setFromCamera(mouse, camera);
 
     const intersects = raycaster.intersectObjects(scene.children, true);
 
     if (intersects.length > 0) {
-        const intersectedObject = intersects[0].object;
-        const name = intersectedObject.name;
+        const clickedObject = intersects[0].object;
+        console.log('Clicked Object Name:', clickedObject.name); // Debug log to check the object name
 
-        console.log('Clicked on object with name:', name); // Debug logging
+        if (clickedObject.name.startsWith('shelf-')) {
+            const { x, y } = toScreenPosition(clickedObject, camera, renderer);
 
-        // Use regular expression to extract setIndex and shelfIndex
-        const regex = /^shelf-(\d+)-(\d+)$/; // Matches 'shelf-<digits>-<digits>'
-        const match = name.match(regex);
+            const [ , setIndex, shelfIndex ] = clickedObject.name.split('-').map(Number);
+            const numbersOnShelf = numbers[setIndex] || [];
 
-        if (match) {
-            const setIndex = parseInt(match[1]); // Convert to integer
-            const shelfIndex = parseInt(match[2]); // Convert to integer
-
-            console.log('Clicked on shelf:', setIndex, shelfIndex);
-
-            if (!isNaN(setIndex) && !isNaN(shelfIndex) && shelfSetsNumbers[setIndex] && shelfSetsNumbers[setIndex][shelfIndex]) {
-                const numbers = shelfSetsNumbers[setIndex][shelfIndex];
-
-                // Display numbers (example: update a DOM element)
-                const infoBox = document.getElementById('infoBox');
-                infoBox.innerHTML = `Numbers on ${name}: ${numbers.join(', ')}`;
-                infoBox.style.display = 'block';
-                infoBox.style.left = `${event.clientX}px`;
-                infoBox.style.top = `${event.clientY}px`;
-            } else {
-                console.error('Invalid indices:', setIndex, shelfIndex);
-            }
-        } else {
-            console.error('Invalid name format:', name);
+            infoDiv.innerHTML = `<strong>Shelf ${clickedObject.name + numbers}</strong><br>${numbersOnShelf.join('<br>')}`;
+            infoDiv.style.display = 'block';
+            infoDiv.style.left = `${x}px`;
+            infoDiv.style.top = `${y}px`;
+            infoDiv.style.transform = 'translate(-50%, -100%)'; // Center the info box above the shelf
         }
     }
-});
+}
 
+// Initial camera position
+camera.position.set(0, 20, 100);
 
-
-
-
-
-
-
+// Start the animation loop
+animate();
