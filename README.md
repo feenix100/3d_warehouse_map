@@ -1,7 +1,10 @@
 # 3d Map for a Machine Parts Distribution Warehouse 
-# Using three.js, a javascript 3d library
+
+### This project will use [three.js](https://threejs.org/), a javascript 3d library
 
 This is a work in progress, open index.html in a browser. Click and drag the cursor to change the view.
+
+gui_sliders.html is an example of how to use the dat-gui javascript library to interact with 3d objects using the three.js library
 
 warehouse2300 is the development branch.
 
@@ -16,5 +19,6 @@ I have the part numbers in an excel spreadsheet, I will export them to csv file,
 
 The goal is to use code to create an easy to update and edit, 3-dimensional map that can be run fast and easy on multiple computer systems.
 
+I will write all the code in one file to increase portability between systems. Splitting the code into multiple files could make it cleaner, but more complicated in other ways.
 
-I will attempt to use three.js to accomplish this.
+I will attempt to use the three.js javascript library to accomplish this.
