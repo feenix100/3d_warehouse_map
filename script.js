@@ -1,32 +1,56 @@
 // Basic setup
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
+function setupThreeJS() {
+    // Create and setup the scene
+    const scene = new THREE.Scene();
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+    // Create and setup the camera
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 20, 100);
 
-// OrbitControls
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.25;
-controls.screenSpacePanning = false;
+    // Create and setup the renderer
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft white light
-scene.add(ambientLight);
+    // Create and setup the controls
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(10, 10, 10).normalize();
-scene.add(directionalLight);
+    return { scene, camera, renderer, controls };
+}
 
-// Add axes helper with thicker lines
-const axesHelper = new THREE.AxesHelper(20); // Length of axes lines
-axesHelper.material.linewidth = 7; // Adjust line thickness
-axesHelper.position.set(0, 10, 0); // Move axes helper up along the y-axis
-scene.add(axesHelper);
+// Initialize scene, camera, renderer, and controls
+const { scene, camera, renderer, controls } = setupThreeJS();
+
+
+// Lighting setup
+
+function addLighting() {
+    const ambientLight = new THREE.AmbientLight(0x404040, 2);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(10, 10, 10).normalize();
+    scene.add(directionalLight);
+}
+
+function addAxesHelper(length, linewidth, x, y, z) {
+    const axesHelper = new THREE.AxesHelper(length);
+    axesHelper.material.linewidth = linewidth;
+    axesHelper.position.set(x, y, z);
+    scene.add(axesHelper);
+}
+
+addLighting();
+
+// Axes helper setup
+addAxesHelper(20, 7, 0, 10, 0);
 
 // Raycaster for detecting clicks
+// detects where rays intersect with position of mouse click
+
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
@@ -77,23 +101,29 @@ const extraLongShelfNames = [
 
 // Midsection names
 for (let i = 0; i < 7; i++) {
-    midsectionNames.push(`${i + 1}stRow_Midsection`);
+    midsectionNames.push(`Row_${i + 1}_Midsection`);
 }
 
 // Top section names
 for (let i = 0; i < 4; i++) {
-    topSectionNames.push(`${i + 1}stRow_Top_Section`);
+    topSectionNames.push(`Row_${i + 1}_Top_Section`);
 }
 
 // Fuel section names
 for (let i = 0; i < 5; i++) {
-    fuelSectionNames.push(`${i + 1}stRow_Fuel_Section`);
+    fuelSectionNames.push(`Row_${i + 1}_Fuel_Section`);
 }
 
 // Function to create shelves
 function createShelves(positions) {
     const spaceBetweenSets = 2; // Reduced space between each set
     const spaceBetweenShelves = 5; // Space between each shelf in a set
+
+    // Ensure we have enough part numbers arrays to assign to each shelf group
+    if (positions.length > part_numbers.length) {
+        console.error('Not enough part numbers arrays to assign to each shelf group.');
+        return;
+    }
 
     positions.forEach((position, i) => {
         const { startX, startZ, shelfType, shelfSetName, setIndex } = position;
@@ -131,7 +161,7 @@ function createShelves(positions) {
             shelf.name = `shelf-${setIndex}-${j}`;
 
             // Attach part numbers to shelf user data
-            const partNumbers = (shelfSetPartNumbers[setIndex] || [])[j] || [];
+            const partNumbers = (shelfGroup.userData.partNumbers || [])[j] || [];
             shelf.userData.partNumbers = partNumbers;
 
             shelfGroup.add(shelf);
@@ -143,11 +173,15 @@ function createShelves(positions) {
             label += ' (Rotated)';
         }
         createShelfLabel(shelfGroup, label, shelf_set_Height_Max * (shelfHeight + spaceBetweenShelves) + 2);
+
+        // Assign part numbers array to the group
+        const partNumbersForGroup = part_numbers[i] || [];
+        shelfGroup.userData.partNumbers = partNumbersForGroup;
+
         scene.add(shelfGroup);
         shelfSets.push(shelfGroup); // Add group to array
     });
 }
-
 
 // Function to create labels for shelf sets
 function createShelfLabel(group, text, yPosition) {
@@ -250,11 +284,6 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// Function to close the info div
-function closeInfoDiv() {
-    infoDiv.style.display = 'none';
-}
-
 // Event listener for mouse clicks
 window.addEventListener('click', onMouseClick, false);
 
@@ -282,6 +311,14 @@ function toScreenPosition(obj, camera, renderer) {
 
 
 // Handle mouse click
+// Mapping of shelf sets to their names
+const shelfSetNames = [
+    ...midsectionNames, // 7 Midsection Shelves
+    ...topSectionNames, // 4 Top Section Shelves
+    ...fuelSectionNames, // 5 Fuel Section Shelves
+    ...extraLongShelfNames // Extra-long Shelves
+];
+
 function onMouseClick(event) {
     event.preventDefault();
 
@@ -293,37 +330,118 @@ function onMouseClick(event) {
     raycaster.setFromCamera(mouse, camera);
 
     // Check for intersections with objects in the scene
+    // this finds the coordinates of the intersection of the raycast and mouse click
+
     const intersects = raycaster.intersectObjects(scene.children, true);
 
     if (intersects.length > 0) {
         const clickedObject = intersects[0].object;
 
+        // Check if the clicked object is a shelf
         if (clickedObject.name.startsWith('shelf-')) {
-            // Extract the set index from the shelf name
-            const [ , setIndex ] = clickedObject.name.split('-').map(Number);
+            // Retrieve the shelfGroup that contains the clicked shelf
+            let parentGroup = clickedObject.parent;
+            while (parentGroup && !(parentGroup instanceof THREE.Group)) {
+                parentGroup = parentGroup.parent;
+            }
 
-            // Retrieve part numbers for the entire set based on the set index
-            const partNumbersForSet = shelfSetPartNumbers[setIndex] || [];
+            if (parentGroup) {
+                // Retrieve part numbers for the entire group based on the group user data
+                const partNumbersForGroup = parentGroup.userData.partNumbers || [];
 
-            // Flatten the part numbers for the entire set into a single list
-            const allPartNumbers = partNumbersForSet.flat();
+                // Flatten the part numbers for the entire group into a single list
+                const allPartNumbers = partNumbersForGroup.flat();
 
-            // Update infoDiv content
-            infoDiv.innerHTML = `<strong>Shelf Set ${setIndex + 1}</strong><br>${allPartNumbers.join('<br>')}`;
-            infoDiv.style.display = 'block';
+                // Function to format part numbers with 6 numbers per line
+                function formatPartNumbers(numbers, perLine) {
+                    let formatted = '';
+                    for (let i = 0; i < numbers.length; i++) {
+                        if (i > 0 && i % perLine === 0) {
+                            formatted += '<br>';
+                        }
+                        formatted += numbers[i] + ' ';
+                    }
+                    return formatted.trim(); // Remove trailing space
+                }
 
-            //trying to get the part_numbers array to display correctly when clicking on a set of shelves
-            //one array should display for each shelf set
+                // Format part numbers with 6 per line
+                const formattedPartNumbers = formatPartNumbers(allPartNumbers, 6);
 
-            // Position infoDiv
-            const { x, y } = toScreenPosition(clickedObject, camera, renderer);
-            infoDiv.style.left = `${x}px`;
-            infoDiv.style.top = `${y}px`;
-            infoDiv.style.transform = 'translate(-50%, -100%)'; // Center the info box above the shelf
+                // Determine the shelf set name based on the index
+                const setIndex = shelfSets.indexOf(parentGroup);
+                const shelfSetName = shelfSetNames[setIndex] || 'Unknown Shelf Set';
+
+                // Update infoDiv content with formatted part numbers and shelf set name
+                infoDiv.innerHTML = `<strong>${shelfSetName}</strong><br>${formattedPartNumbers}`;
+                infoDiv.style.display = 'block';
+
+                // Position infoDiv
+                const { x, y } = toScreenPosition(clickedObject, camera, renderer);
+                infoDiv.style.left = `${x}px`;
+                infoDiv.style.top = `${y}px`;
+                infoDiv.style.transform = 'translate(-50%, -100%)'; // Center the info box above the shelf
+            }
         }
     }
 }
 
+//when mouse hovers above shelf, tooltip is engaged
+
+let tooltip = document.createElement('div');
+tooltip.style.position = 'absolute';
+tooltip.style.background = 'rgba(0,0,0,0.7)';
+tooltip.style.color = 'white';
+tooltip.style.padding = '5px';
+tooltip.style.borderRadius = '5px';
+tooltip.style.display = 'none';
+document.body.appendChild(tooltip);
+
+function onMouseMove(event) {
+    event.preventDefault();
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(scene.children, true);
+
+    if (intersects.length > 0) {
+        const intersectedObject = intersects[0].object;
+
+        if (intersectedObject.name.startsWith('shelf-')) {
+            tooltip.style.display = 'block';
+            
+            // Determine the shelf set name based on the index
+            let parentGroup = intersectedObject.parent;
+            while (parentGroup && !(parentGroup instanceof THREE.Group)) {
+                parentGroup = parentGroup.parent;
+            }
+
+            const setIndex = shelfSets.indexOf(parentGroup);
+            const shelfSetName = shelfSetNames[setIndex] || 'Unknown Shelf Set';
+            //tooltip is created when mouse hovers over shelf
+            
+            tooltip.innerText = `Shelf: ${shelfSetName}`;
+            const { x, y } = toScreenPosition(intersectedObject, camera, renderer);
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+        } else {
+            tooltip.style.display = 'none';
+        }
+    } else {
+        tooltip.style.display = 'none';
+    }
+}
+
+window.addEventListener('mousemove', onMouseMove, false);
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', onWindowResize, false);
 
 // Initial camera position
 camera.position.set(0, 20, 100);
