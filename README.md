@@ -18,4 +18,4 @@ each shelf should be able to rotate on y axis, and move forward/backward left/ri
 
 how to display numbers? dropbox, canvas 
 numbers should be searchable
-when a number is searched for and found it should be highlighted
+when a number is searched for and found it should be highlighted on the shelf
