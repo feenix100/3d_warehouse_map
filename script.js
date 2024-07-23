@@ -1,4 +1,7 @@
 // Basic setup
+// this is a digital representation of a physical warehouse
+// the part_numbers array contains the numbers that are associated with machine parts in the physical warehouse 
+
 function setupThreeJS() {
     // Create and setup the scene
     const scene = new THREE.Scene();
@@ -28,13 +31,28 @@ const { scene, camera, renderer, controls } = setupThreeJS();
 // Lighting setup
 
 function addLighting() {
-    const ambientLight = new THREE.AmbientLight(0x404040, 2);
+    // Ambient light to provide basic illumination
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.2); // Lower intensity for a more natural look
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(10, 10, 10).normalize();
-    scene.add(directionalLight);
+    // Sunlight simulation with a strong directional light
+    const sunlight = new THREE.DirectionalLight(0xffffff, 1.5); // White color and higher intensity
+    sunlight.position.set(30, 60, 30); // Position it to cast light from a high angle
+    sunlight.castShadow = true;
+    sunlight.shadow.camera.near = 1;
+    sunlight.shadow.camera.far = 100;
+    sunlight.shadow.camera.left = -50;
+    sunlight.shadow.camera.right = 50;
+    sunlight.shadow.camera.top = 50;
+    sunlight.shadow.camera.bottom = -50;
+    scene.add(sunlight);
+
+    // Optional: You can adjust the shadow properties to get more realistic shadows
+    sunlight.shadow.mapSize.width = 2048;  // Increased resolution
+    sunlight.shadow.mapSize.height = 2048;
+    sunlight.shadow.bias = -0.01; // Reduce shadow artifacts
 }
+
 
 function addAxesHelper(length, linewidth, x, y, z) {
     const axesHelper = new THREE.AxesHelper(length);
@@ -151,7 +169,7 @@ function createShelves(positions) {
             }
 
             const geometry = new THREE.BoxGeometry(shelfWidth, shelfHeight, shelfDepth);
-            const material = new THREE.MeshStandardMaterial({ color: 0x8AC });
+            const material = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
             const shelf = new THREE.Mesh(geometry, material);
 
             const startY = j * (shelfHeight + spaceBetweenShelves);
@@ -241,19 +259,115 @@ for (let i = 0; i < fuelSectionNames.length; i++) {
 
 // Function to create the desk
 function createDesk() {
-    // Desk geometry and material
+    // Desk dimensions
     const deskWidth = 20;
     const deskHeight = 0.5;
     const deskDepth = 10;
+    const legHeight = 7;
+    const legThickness = 0.5;
 
+    // Desk geometry and material
     const deskGeometry = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth);
-    const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x8A8 });
+    const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color for the desk
     const desk = new THREE.Mesh(deskGeometry, deskMaterial);
-    desk.position.set(0, -deskHeight / 2, 0); // Set the position so the desk is on the ground (y = 0).
+    desk.position.set(0, legHeight + deskHeight / 2, 0); // Position the desk on top of the legs
 
-    // Add desk to the scene
+    // Leg geometry and material
+    const legGeometry = new THREE.BoxGeometry(legThickness, legHeight, legThickness);
+    const legMaterial = new THREE.MeshStandardMaterial({ color: 0x4B3B2A }); // Darker brown for the legs
+
+    // Create four legs and position them
+    const leg1 = new THREE.Mesh(legGeometry, legMaterial);
+    leg1.position.set(-deskWidth / 2 + legThickness / 2, legHeight / 2, -deskDepth / 2 + legThickness / 2);
+
+    const leg2 = new THREE.Mesh(legGeometry, legMaterial);
+    leg2.position.set(deskWidth / 2 - legThickness / 2, legHeight / 2, -deskDepth / 2 + legThickness / 2);
+
+    const leg3 = new THREE.Mesh(legGeometry, legMaterial);
+    leg3.position.set(-deskWidth / 2 + legThickness / 2, legHeight / 2, deskDepth / 2 - legThickness / 2);
+
+    const leg4 = new THREE.Mesh(legGeometry, legMaterial);
+    leg4.position.set(deskWidth / 2 - legThickness / 2, legHeight / 2, deskDepth / 2 - legThickness / 2);
+
+    // Add desk and legs to the scene
     scene.add(desk);
+    scene.add(leg1);
+    scene.add(leg2);
+    scene.add(leg3);
+    scene.add(leg4);
 }
+
+// Function to search part numbers
+function searchPartNumber() {
+    //select the html elements
+    const searchInput = document.getElementById('searchInput');
+    const searchResult = document.getElementById('searchResult');
+    const shelfNameDiv = document.getElementById('shelfName');
+
+    //search the part_number arrays for the input value
+    const partNumber = searchInput.value.trim();
+
+    // Clear previous highlights and shelf name
+    shelfSets.forEach(group => {
+        group.traverse(child => {
+            if (child instanceof THREE.Mesh) {
+                child.material.color.set('#8B4513'); // Reset shelf color to default
+            }
+        });
+    });
+    shelfNameDiv.innerHTML = '';
+
+    if (partNumber === '') {
+        searchResult.innerHTML = 'Please enter a part number.';
+        return;
+    }
+
+    // Search through part_numbers array
+    let found = false;
+    for (const [index, group] of part_numbers.entries()) {
+        if (group.includes(Number(partNumber))) {
+            // searchResult.innerHTML = `Part number ${partNumber} found in the shelves.`;
+            // Highlight the shelf group
+            const shelfGroup = shelfSets[index];
+            shelfGroup.traverse(child => {
+                if (child instanceof THREE.Mesh) {
+                    child.material.color.set('#ff0000'); // Highlight the shelf
+                }
+            });
+            // display search result with shelf name
+            //shelfNameDiv.innerHTML = `Part number ${partNumber} is on ${shelfSetNames[index]}.`;
+            searchResult.innerHTML = `Part number ${partNumber} is on ${shelfSetNames[index]}.`;
+            
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        searchResult.innerHTML = `Part number ${partNumber} not found.`;
+    }
+}
+
+
+// Event listener for the search button
+document.getElementById('searchButton').addEventListener('click', searchPartNumber);
+
+// Optionally, handle "Enter" key press in the input box
+document.getElementById('searchInput').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        searchPartNumber();
+    }
+});
+
+// Event listener for the search button
+document.getElementById('searchButton').addEventListener('click', searchPartNumber);
+
+// Optionally, handle "Enter" key press in the input box
+document.getElementById('searchInput').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        searchPartNumber();
+    }
+});
 
 // Function to create the floor
 function createFloor() {
