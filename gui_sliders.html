@@ -7,6 +7,25 @@
     <style>
         body { margin: 0; }
         canvas { display: block; }
+
+        #bottomMessage {
+        position: fixed; /* Fixed position to stick to the bottom */
+        bottom: 0;
+        left: 50%; /* Position from the center */
+        transform: translateX(-50%); /* Center horizontally */
+        width: 80%; /* Set a specific width */
+        max-width: 70vw; /* Maximum width */
+        background-color: #273456; /* Dark background color */
+        color: white; /* White text color */
+        text-align: center; /* Centered text */
+        padding: 25px; /* Padding for spacing */
+        font-size: 32px; /* Font size */
+        z-index: 1000; /* Ensure it's on top of other elements */
+        box-shadow: 0 -4px 8px rgba(0,0,0,0.1); /* Shadow for better visibility */
+        opacity: 0.7; /* Set opacity */
+        }
+
+        
     </style>
 </head>
 <body>
@@ -179,42 +198,79 @@
         }
 
         function createDesk() {
-            // Desk geometry and material
+            // Desk dimensions
             const deskWidth = 20;
             const deskHeight = 2;
             const deskDepth = 10;
+            const legHeight = 5; // Height of the desk legs
+            const legThickness = 0.5; // Thickness of the legs
+            const drawerWidth = 6; // Width of the drawer
+            const drawerHeight = 1; // Height of the drawer
+            const drawerDepth = 2; // Depth of the drawer
 
-            const deskGeometry = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth);
-            const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color
+            // Desk surface geometry and material
+            const deskSurfaceGeometry = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth);
+            const deskSurfaceMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color
+            const deskSurface = new THREE.Mesh(deskSurfaceGeometry, deskSurfaceMaterial);
+            deskSurface.position.set(0, deskHeight / 2, 0);
 
-            const desk = new THREE.Mesh(deskGeometry, deskMaterial);
+            // Desk legs geometry and material
+            const legGeometry = new THREE.BoxGeometry(legThickness, legHeight, legThickness);
+            const legMaterial = new THREE.MeshStandardMaterial({ color: 0x6D4C41 }); // Darker brown for the legs
 
-            // Position the desk appropriately
-            desk.position.set(0, deskHeight / 2, -20); // Adjust as needed
+            // Create four legs
+            const leg1 = new THREE.Mesh(legGeometry, legMaterial);
+            leg1.position.set(-deskWidth / 2 + legThickness / 2, -legHeight / 2, -deskDepth / 2 + legThickness / 2);
 
-            // Add GUI controls for the new desk
+            const leg2 = new THREE.Mesh(legGeometry, legMaterial);
+            leg2.position.set(deskWidth / 2 - legThickness / 2, -legHeight / 2, -deskDepth / 2 + legThickness / 2);
+
+            const leg3 = new THREE.Mesh(legGeometry, legMaterial);
+            leg3.position.set(-deskWidth / 2 + legThickness / 2, -legHeight / 2, deskDepth / 2 - legThickness / 2);
+
+            const leg4 = new THREE.Mesh(legGeometry, legMaterial);
+            leg4.position.set(deskWidth / 2 - legThickness / 2, -legHeight / 2, deskDepth / 2 - legThickness / 2);
+
+            // Optional: Add a drawer
+            const drawerGeometry = new THREE.BoxGeometry(drawerWidth, drawerHeight, drawerDepth);
+            const drawerMaterial = new THREE.MeshStandardMaterial({ color: 0x3E2723 }); // Darker brown for the drawer
+            const drawer = new THREE.Mesh(drawerGeometry, drawerMaterial);
+            drawer.position.set(0, drawerHeight / 2 - deskHeight / 2, -deskDepth / 2 + drawerDepth / 2); // Position in the middle of the desk surface
+
+            // Combine all parts into the desk group
+            const deskGroup = new THREE.Group();
+            deskGroup.add(deskSurface);
+            deskGroup.add(leg1);
+            deskGroup.add(leg2);
+            deskGroup.add(leg3);
+            deskGroup.add(leg4);
+            deskGroup.add(drawer);
+
+            // Position the desk
+            deskGroup.position.set(0, deskHeight / 2, -20); // Adjust as needed
+
+            // Add GUI controls for the desk
             const deskControl = {
                 x: 0,
                 yRotation: 0, // Rotation on y-axis
-                z: 10,
-            }
+                z: 0,
+        };
 
-            const folder = gui.addFolder(`Desk`);
-            folder.add(deskControl, 'x').min(-100).max(100).name('Position X').onChange((value) => {
-                desk.position.x = value;
-            });
-            folder.add(deskControl, 'yRotation').min(0).max(Math.PI * 2).name('Rotation Y').onChange((value) => {
-                // Snap rotation to nearest π/2 for easier alignment
-                const snappedRotation = Math.round(value / (Math.PI / 2)) * (Math.PI / 2);
-                desk.rotation.y = snappedRotation;
-                // desk.rotation.y = value; // will spin without snapping to alignment
-            });
-            folder.add(deskControl, 'z').min(-100).max(100).name('Position Z').onChange((value) => {
-                desk.position.z = value;
-            });
-            folder.open();
-            scene.add(desk);
-        }
+    const folder = gui.addFolder(`Desk`);
+    folder.add(deskControl, 'x').min(-100).max(100).name('Position X').onChange((value) => {
+        deskGroup.position.x = value;
+    });
+    folder.add(deskControl, 'yRotation').min(0).max(Math.PI * 2).name('Rotation Y').onChange((value) => {
+        const snappedRotation = Math.round(value / (Math.PI / 2)) * (Math.PI / 2);
+        deskGroup.rotation.y = snappedRotation;
+    });
+    folder.add(deskControl, 'z').min(-100).max(100).name('Position Z').onChange((value) => {
+        deskGroup.position.z = value;
+    });
+    folder.open();
+    scene.add(deskGroup);
+}
+
 
         // Function to create the floor
         function createFloor(size) {
@@ -290,5 +346,6 @@
         createGrid(200, 20);
         createDesk();
     </script>
+    <div id="bottomMessage">Use the sliders on the right side of the window to move the shelves! Or add another shelf set.<br>Shelves will move on the X and Z axis, snap rotation on the Y axis.<br>Click and drag to change camera view, or press shift, then click and drag to move forward and backward</div> <!-- Bottom message div -->
 </body>
 </html>
