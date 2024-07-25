@@ -30,27 +30,81 @@ const { scene, camera, renderer, controls } = setupThreeJS();
 
 // Lighting setup
 
+function createBackgroundTexture() {
+    const width = 512;
+    const height = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext('2d');
+
+    // Create gradient
+    const gradient = context.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#000033'); // Deep blue (top)
+    gradient.addColorStop(1, '#000080'); // Lighter blue (bottom)
+
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    return texture;
+}
+
 function addLighting() {
-    // Ambient light to provide basic illumination
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.2); // Lower intensity for a more natural look
+    // Create starry night gradient background
+    const BackGroundTexture = createBackgroundTexture();
+    scene.background = BackGroundTexture;
+
+    // Ambient light with lower intensity
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.2); // Reduced intensity for a darker scene
     scene.add(ambientLight);
 
-    // Sunlight simulation with a strong directional light
-    const sunlight = new THREE.DirectionalLight(0xffffff, 1.5); // White color and higher intensity
-    sunlight.position.set(30, 60, 30); // Position it to cast light from a high angle
+    // Hemisphere light with lower intensity
+    const hemisphereLight = new THREE.HemisphereLight(0x333366, 0x111111, 0.3); // Dim sky and ground colors with lower intensity
+    scene.add(hemisphereLight);
+
+    // Sunlight simulation with reduced intensity
+    const sunlight = new THREE.DirectionalLight(0xffffff, 1.0); // Lower intensity
+    sunlight.position.set(50, 100, 50); // Position it to cast light from a high angle
     sunlight.castShadow = true;
+
+    // Shadow properties for deeper shadows
     sunlight.shadow.camera.near = 1;
-    sunlight.shadow.camera.far = 100;
-    sunlight.shadow.camera.left = -50;
-    sunlight.shadow.camera.right = 50;
-    sunlight.shadow.camera.top = 50;
-    sunlight.shadow.camera.bottom = -50;
+    sunlight.shadow.camera.far = 150;
+    sunlight.shadow.camera.left = -100;
+    sunlight.shadow.camera.right = 100;
+    sunlight.shadow.camera.top = 100;
+    sunlight.shadow.camera.bottom = -100;
+    sunlight.shadow.mapSize.width = 8192; // Higher resolution shadow map
+    sunlight.shadow.mapSize.height = 8192;
+    sunlight.shadow.bias = -0.01; // Fine-tuned bias for better shadow quality
+
     scene.add(sunlight);
 
-    // Optional: You can adjust the shadow properties to get more realistic shadows
-    sunlight.shadow.mapSize.width = 2048;  // Increased resolution
-    sunlight.shadow.mapSize.height = 2048;
-    sunlight.shadow.bias = -0.01; // Reduce shadow artifacts
+    // Point light with lower intensity
+    const pointLight = new THREE.PointLight(0xffa500, 0.3, 50); // Reduced intensity for a subtler effect
+    pointLight.position.set(-30, 40, 30); // Position it to highlight specific areas
+    scene.add(pointLight);
+
+    // Spot light with adjusted settings for more dramatic shadows
+    const spotLight = new THREE.SpotLight(0xffffff, 0.5); // Reduced intensity
+    spotLight.position.set(0, 50, 0); // Position it from above
+    spotLight.angle = Math.PI / 6; // Narrower cone for more focused light
+    spotLight.penumbra = 0.3; // Slightly softer edges
+    spotLight.decay = 2; // How light fades over distance
+    spotLight.distance = 100;
+    spotLight.castShadow = true;
+
+    // Shadow properties for the spot light
+    spotLight.shadow.camera.near = 10;
+    spotLight.shadow.camera.far = 150;
+    spotLight.shadow.camera.fov = 40; // Field of view of the shadow camera
+    spotLight.shadow.mapSize.width = 4096; // Shadow map size
+    spotLight.shadow.mapSize.height = 4096;
+    scene.add(spotLight);
 }
 
 
@@ -80,7 +134,7 @@ const shelfDepth = 3;
 const shelfDimensions = {
     regular: { width: 10, length: 1 },
     rotated: { width: 10, length: 1 },
-    extraLong: { width: 30, length: 10 } // Custom width and length for extra-long shelves
+    extraLong: { width: 50, length: 10 } // Custom width and length for extra-long shelves
 };
 
 // Numbers for machine parts on shelf sets
@@ -102,7 +156,12 @@ const part_numbers = [
     [11268, 9199, 20583, 20584, 9900, 9901, 9424, 9484, 9485, 9486, 10003, 10843, 11235, 11236, 11263, 11258, 12043, 12044, 12046, 12048, 12509, 13132, 15113, 15114, 15535, 15536, 16806, 16416, 17549, 17550, 17551, 17552, 18515, 20466, 20905, 21979, 22597, 22806, 22807, 22910, 23149, 23944, 23945, 23991, 23992, 24286, 29368, 29690, 30389, 31557, 31652, 26927],  // Row 2 fuel section
     [33709, 38808, 34480, 41349, 43322, 43587, 46559, 45940, 46888, 49196, 51328, 54513, 53258, 55060, 57789, 57552, 58214, 58256, 58632, 61335, 61336, 61338, 57646, 65244, 67884, 61832, 63710, 66369, 66370, 68531, 69888],  // Row 3 fuel section
     [67235, 67712, 69128, 71244, 75197, 76072, 79104, 82091, 85896, 92547, 93198, 100431, 103874, 104479, 110088, 34479, 36327, 36328, 36329, 36331, 36767, 88295],  // Row 4 fuel section
-    [12500, 99324, 99325, 99323, 99885, 103103, 34730]  // Row 5 fuel section
+    [12500, 99324, 99325, 99323, 99885, 103103, 34730],  // Row 5 fuel section
+
+    [169848, 15470, 151458, 1549, 2410],  // long Shelf 1
+    [1455, 5412, 54153, 5454, 5445],    // long Shelf 2
+    [54546, 1766, 8844, 9541, 1011],   // long Shelf 3
+    
 ];
 
 let shelfSets = []; // Array to hold groups of shelves
@@ -242,6 +301,8 @@ const shelfSetPartNumbers = {
     3: part_numbers.slice(16) // Additional Sections (e.g., Extra-long shelves)
 };
 
+
+// shelf types extraLong_Rotated, regular, rotated, extraLong
 // Create positions for Midsections
 for (let i = 0; i < midsectionNames.length; i++) {
     positions.push({ startX: -30, startZ: -60 + 10 * i, shelfType: 'regular', shelfSetName: midsectionNames[i], setIndex: 0 });
@@ -257,6 +318,15 @@ for (let i = 0; i < fuelSectionNames.length; i++) {
     positions.push({ startX: -50, startZ: 50 + 10 * i, shelfType: 'regular', shelfSetName: fuelSectionNames[i], setIndex: 2 });
 }
 
+// create positions for extra long shelves  shelf types extraLong_Rotated, regular, rotated, extraLong
+positions.push({ startX: -80, startZ: 50, shelfType: 'extraLong_Rotated', shelfSetName: extraLongShelfNames [0], setIndex: 3 });
+
+// create positions for extra long shelves  shelf types extraLong_Rotated, regular, rotated, extraLong
+//positions.push({ startX: 0, startZ: -50, shelfType: 'extraLong', shelfSetName: extraLongShelfNames [1], setIndex: 3 });
+
+// create positions for extra long shelves  shelf types extraLong_Rotated, regular, rotated, extraLong
+positions.push({ startX: 0, startZ: -90, shelfType: 'extraLong', shelfSetName: extraLongShelfNames [2], setIndex: 3 });
+
 // Function to create the desk
 function createDesk() {
     // Desk dimensions
@@ -270,24 +340,35 @@ function createDesk() {
     const deskGeometry = new THREE.BoxGeometry(deskWidth, deskHeight, deskDepth);
     const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color for the desk
     const desk = new THREE.Mesh(deskGeometry, deskMaterial);
-    desk.position.set(0, legHeight + deskHeight / 2, 0); // Position the desk on top of the legs
+    
+    // Set the desk's position and rotation
+    const deskPosition = new THREE.Vector3(80, legHeight + deskHeight / 2, 0);
+    const deskRotation = Math.PI / 2; // Example rotation of 90 degrees (π/2 radians)
+    desk.position.copy(deskPosition);
+    desk.rotation.y = deskRotation;
 
     // Leg geometry and material
     const legGeometry = new THREE.BoxGeometry(legThickness, legHeight, legThickness);
     const legMaterial = new THREE.MeshStandardMaterial({ color: 0x4B3B2A }); // Darker brown for the legs
 
-    // Create four legs and position them
-    const leg1 = new THREE.Mesh(legGeometry, legMaterial);
-    leg1.position.set(-deskWidth / 2 + legThickness / 2, legHeight / 2, -deskDepth / 2 + legThickness / 2);
+    // Create four legs and position them relative to the rotated desk
+    const createLeg = (xOffset, zOffset) => {
+        const leg = new THREE.Mesh(legGeometry, legMaterial);
 
-    const leg2 = new THREE.Mesh(legGeometry, legMaterial);
-    leg2.position.set(deskWidth / 2 - legThickness / 2, legHeight / 2, -deskDepth / 2 + legThickness / 2);
+        // Calculate leg position relative to desk center
+        const legOffset = new THREE.Vector3(xOffset, -deskHeight / 2 - legHeight / 2, zOffset);
+        legOffset.applyMatrix4(new THREE.Matrix4().makeRotationY(deskRotation)); // Apply rotation
+        legOffset.add(deskPosition); // Apply position
 
-    const leg3 = new THREE.Mesh(legGeometry, legMaterial);
-    leg3.position.set(-deskWidth / 2 + legThickness / 2, legHeight / 2, deskDepth / 2 - legThickness / 2);
+        leg.position.copy(legOffset);
+        return leg;
+    };
 
-    const leg4 = new THREE.Mesh(legGeometry, legMaterial);
-    leg4.position.set(deskWidth / 2 - legThickness / 2, legHeight / 2, deskDepth / 2 - legThickness / 2);
+    // Position of legs relative to the desk's center
+    const leg1 = createLeg(-deskWidth / 2 + legThickness / 2, -deskDepth / 2 + legThickness / 2);
+    const leg2 = createLeg(deskWidth / 2 - legThickness / 2, -deskDepth / 2 + legThickness / 2);
+    const leg3 = createLeg(-deskWidth / 2 + legThickness / 2, deskDepth / 2 - legThickness / 2);
+    const leg4 = createLeg(deskWidth / 2 - legThickness / 2, deskDepth / 2 - legThickness / 2);
 
     // Add desk and legs to the scene
     scene.add(desk);
@@ -326,7 +407,7 @@ function searchPartNumber() {
     let found = false;
     for (const [index, group] of part_numbers.entries()) {
         if (group.includes(Number(partNumber))) {
-            // searchResult.innerHTML = `Part number ${partNumber} found in the shelves.`;
+            
             // Highlight the shelf group
             const shelfGroup = shelfSets[index];
             shelfGroup.traverse(child => {
@@ -335,7 +416,7 @@ function searchPartNumber() {
                 }
             });
             // display search result with shelf name
-            //shelfNameDiv.innerHTML = `Part number ${partNumber} is on ${shelfSetNames[index]}.`;
+            
             searchResult.innerHTML = `Part number ${partNumber} is on ${shelfSetNames[index]}.`;
             
             found = true;

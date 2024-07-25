@@ -35,12 +35,12 @@
             position: fixed; /* Fixed position to stick to the bottom */
             bottom: 0;
             left: 0;
-            width: 100%;
+            width: 100vw;
             background-color: #333; /* Dark background color */
             color: white; /* White text color */
             text-align: center; /* Centered text */
-            padding: 25px; /* Padding for spacing */
-            font-size: 32px; /* Font size */
+            padding: 20px; /* Padding for spacing */
+            font-size: 16px; /* Font size */
             z-index: 1000; /* Ensure it's on top of other elements */
             box-shadow: 0 -4px 8px rgba(0,0,0,0.1); /* Shadow for better visibility */
             opacity: .75;
@@ -88,7 +88,7 @@
 <body>
     
     <div id="infoBox" style="position: absolute; display: none; background: white; border: 1px solid black; padding: 10px; pointer-events: none;"></div>
-    <div id="bottomMessage">Click on a shelf to display the part numbers!<br>Click and drag to change camera view, or press shift, then click and drag to move forward and backward</div> <!-- Bottom message div -->
+    <div id="bottomMessage">Click on the top of a shelf to display the part numbers!<br>Click and drag to change camera view, or press shift, then click and drag to move forward and backward<br>Use the search bar to find a part number, the shelf with the part will be highlighted</div> <!-- Bottom message div -->
 
     <div id="searchContainer">
         <input type="text" id="searchInput" placeholder="Enter part number">
@@ -104,6 +104,6 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
-    <script src="script.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
