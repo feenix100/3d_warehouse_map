@@ -47,7 +47,7 @@ Numbers should be searchable, and when a number is found, it should be highlight
 
 To keep things simple and maintain local usage, the code will be organized into one or two files:
 - `index.html`
-- `script.js`
+- `app.js`
 
 ### Visualization and Usability
 
