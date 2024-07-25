@@ -1,48 +1,63 @@
-# 3D Map for a Machine Parts Distribution Warehouse 
+# 3D Map for a Machine Parts Distribution Warehouse
 
-### This project will use [three.js](https://threejs.org/), a JavaScript 3D library.
+### Overview
 
-This is a work in progress. Open `index.html` in a browser. Click and drag the cursor to change the view.
+This project utilizes [three.js](https://threejs.org/), a powerful JavaScript 3D library, to create an interactive and immersive map of a machine parts distribution warehouse.
 
-`gui_sliders.html` is an example of how to use the dat-gui JavaScript library to interact with 3D objects using the three.js library.
+### Getting Started
 
-`warehouse2300` is the development branch.
+- **View the Project**: Open `index.html` in a browser. Click and drag the cursor to change the view.
+- **GUI Interaction**: `gui_sliders.html` demonstrates how to use the dat-gui JavaScript library to interact with 3D objects via three.js.
 
-I am creating a three-dimensional map of the shelves in a machine parts distribution warehouse. There are about 20 rows of shelves in the warehouse.
+### Development Branch
 
-I am still trying to decide how to display the numbers on each shelf. Should I use a drop box, text objects, or something else? I need to be able to easily edit the values and positions of the numbers on the shelves.
+- **Current Branch**: `warehouse2300` is the active development branch for this project.
 
-Each shelf is filled with parts that are labeled and organized using numbers, four to six digits in length. Example: 8421, 100201. There are about 3000 different parts in the warehouse.
+### Project Description
 
-I have the part numbers in an Excel spreadsheet. I will export them to a CSV file, then import them into the JavaScript code to fill in the numbers on the shelves.
+This project aims to create a three-dimensional map of the shelves in a machine parts distribution warehouse. The warehouse comprises approximately 20 rows of shelves.
 
-The goal is to use code to create an easy-to-update and edit, three-dimensional map that can be run fast and easily on multiple computer systems.
+#### Key Features:
+- **Part Number Display**: Each shelf is filled with parts labeled and organized by numbers, four to six digits in length (e.g., 8421, 100201). There are about 3000 different parts in the warehouse.
+- **Data Management**: Part numbers are stored in an Excel spreadsheet. These will be exported to a CSV file and then imported into the JavaScript code to populate the numbers on the shelves.
+- **Portability**: All code will be written in one file to enhance portability between systems. While splitting the code into multiple files could make it cleaner, it may also complicate other aspects.
 
-I will write all the code in one file to increase portability between systems. Splitting the code into multiple files could make it cleaner, but more complicated in other ways.
+### Display and Interaction
 
-I will attempt to use the three.js JavaScript library to accomplish this.
+#### Display Options:
+I am exploring various methods to display numbers on each shelf, such as drop boxes or text objects. The chosen method should allow for easy editing of values and positions.
 
-This is a representation of the shelves in a physical warehouse, using JavaScript to display the shelves and floor. The shelves in the warehouse hold machine parts waiting to be distributed to technicians.
+#### Search Functionality:
+Numbers should be searchable, and when a number is found, it should be highlighted on the corresponding shelf.
 
-To use, open `index.html` in a browser. `index.html` and `app.js` should be in the same directory.
+### Technical Specifications
 
-I plan on using this locally. I will attempt to keep the code in one or two files (`index.html` and `app.js`) to keep things simple.
+- **Groups of Shelves**:
+  - **Top Section**: 4 rows of shelves.
+  - **Middle Section**: 7 rows of shelves.
+  - **Fuel Section**: 5 rows of shelves.
+  - **Extra-Long Shelves**: 3 extra-long shelves along the warehouse walls.
 
-### Specifications for the 3D Shelf Map:
+- **Shelf Details**:
+  - Each row of shelves contains machine parts, each with a unique number between 4 and 6 digits.
+  - The code should accurately represent each shelf in the warehouse.
+  - Shelves should be capable of rotating on the y-axis and moving forward/backward left/right on the x and z axes.
 
-- **Shelves**:
-  - There are four groups (of rows) of shelves in the warehouse:
-    - One group has 4 rows of shelves (top section).
-    - One group has 7 rows of shelves (middle section).
-    - One group has 5 rows of shelves (fuel section).
-  - There are 3 extra-long shelves along the walls of the warehouse.
-  - Each row of shelves is full of machine parts. Each part has a different number between 4 and 6 digits.
+### Code Structure
 
-- **Code Requirements**:
-  - The code should represent each shelf in the warehouse.
-  - Each shelf should be able to rotate on the y-axis and move forward/backward left/right on the x and z axes.
+To keep things simple and maintain local usage, the code will be organized into one or two files:
+- `index.html`
+- `script.js`
 
-### Displaying Numbers:
-- How to display numbers? Inside a 2D div, is there an efficient way to display dozens of 3D numbers?
-- Numbers should be searchable.
-- When a number is searched for and found, it should be highlighted on the shelf.
+### Visualization and Usability
+
+This project provides a visual representation of the shelves in a physical warehouse, using JavaScript to display the shelves and the floor. The shelves house machine parts that are awaiting distribution to technicians.
+
+### Next Steps
+
+1. **Open `index.html`**: Open the file in a browser to start exploring the 3D map.
+2. **Experiment with GUI**: Use `gui_sliders.html` to interact with 3D objects and see the potential of the dat-gui library.
+3. **Optimize Display**: Determine the most efficient way to display and edit numbers on the shelves.
+4. **Implement Search**: Ensure numbers are searchable and highlight them on the shelves when found.
+
+By following these steps and utilizing the features of three.js and dat-gui, this project aims to create a functional, easy-to-use, and visually appealing 3D map of a machine parts distribution warehouse.
