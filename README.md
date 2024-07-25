@@ -24,9 +24,9 @@ I will attempt to use the three.js JavaScript library to accomplish this.
 
 This is a representation of the shelves in a physical warehouse, using JavaScript to display the shelves and floor. The shelves in the warehouse hold machine parts waiting to be distributed to technicians.
 
-To use, open `index.html` in a browser. `index.html` and `script.js` should be in the same directory.
+To use, open `index.html` in a browser. `index.html` and `app.js` should be in the same directory.
 
-I plan on using this locally. I will attempt to keep the code in one or two files (`index.html` and `script.js`) to keep things simple.
+I plan on using this locally. I will attempt to keep the code in one or two files (`index.html` and `app.js`) to keep things simple.
 
 ### Specifications for the 3D Shelf Map:
 
