@@ -51,7 +51,7 @@ To keep things simple and maintain local usage, the code will be organized into 
 
 ### Visualization and Usability
 
-This project provides a visual representation of the shelves in a physical warehouse, using JavaScript to display the shelves and the floor. The shelves house machine parts that are awaiting distribution to technicians.
+This project provides a visual representation of the shelves in a physical warehouse, using JavaScript to display the shelves and the floor. The shelves house machine parts that are awaiting distribution to maintenance technicians.
 
 ### Next Steps
 
